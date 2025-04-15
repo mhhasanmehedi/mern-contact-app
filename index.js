@@ -4,9 +4,16 @@ const mongoose = require("mongoose");
 const Contact = require("./models/contacts.model");
 
 // MongoDB connection --------------------
-mongoose.connect("mongodb://127.0.0.1:27017/contacts-crud").then(() => {
-  console.log("Database connected");
-});
+// mongoose.connect("mongodb://127.0.0.1:27017/contacts-crud").then(() => {
+//   console.log("Database connected");
+// });
+mongoose
+  .connect(
+    "mongodb+srv://mehedi123:mehedi123@cluster0.o7cpz.mongodb.net/contacts-crud?retryWrites=true&w=majority"
+  )
+  .then(() => {
+    console.log("Database connected");
+  });
 
 // Middleware ----------------------------
 app.set("view engine", "ejs");
@@ -42,15 +49,33 @@ app.get("/add-contact", (req, res) => {
   res.render("add-contact");
 });
 
-app.post("/add-contact", (req, res) => {});
+app.post("/add-contact", async (req, res) => {
+  // await Contact.insertOne({
+  // first_name: req.body.first_name,
+  // last_name: req.body.last_name,
+  // phone: req.body.phone,
+  // address: req.body.address,
+  // email: req.body.email,
+  // });
+  await Contact.create(req.body);
 
-app.get("/update-contact/:id", (req, res) => {
-  res.render("update-contact");
+  res.redirect("/");
 });
 
-app.post("/update-contact", (req, res) => {});
+app.get("/update-contact/:id", async (req, res) => {
+  const contact = await Contact.findById(req.params.id);
+  res.render("update-contact", { contact });
+});
 
-app.delete("/delete-contact/:id", (req, res) => {});
+app.post("/update-contact/:id", async (req, res) => {
+  await Contact.findByIdAndUpdate(req.params.id, req.body);
+  res.redirect("/");
+});
+
+app.get("/delete-contact/:id", async (req, res) => {
+  await Contact.findByIdAndDelete(req.params.id);
+  res.redirect("/");
+});
 
 app.listen(4000, () => {
   console.log(`Server listening on port 4000`);
